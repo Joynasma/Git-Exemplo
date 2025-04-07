@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Equipe - TaskJoy</title>
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <div class="container">
+    <!-- MENU LATERAL -->
+    <aside class="menu-lateral">
+      <ul>
+        <li><a href="index.html">🏠 Página Inicial</a></li>
+        <li><a href="Metas.html">✅ Metas</a></li>
+        <li><a href="MinhasTarefas.html">🗂️ Minhas Tarefas</a></li>
+        <li><a href="Anexos.html">📎 Anexos</a></li>
+        <li><a href="Equipe.html" class="ativo">👥 Equipe</a></li>
+      </ul>
+    </aside>
+
+    <!-- TOPO -->
+    <header class="topo">
+      <h1>Equipe</h1>
+      <span id="dataAtual"></span>
+    </header>
+
+    <!-- CONTEÚDO -->
+    <main class="conteudo">
+      <div class="cabecalho-projetos">
+        <h2>Equipe</h2>
+        <div>
+          <input type="text" id="buscarEquipe" placeholder="Buscar Equipe...">
+          <button onclick="abrirCadastrarEquipe()">Cadastrar Equipe</button>
+          <button onclick="abrirCadastrarColaborador()">Cadastrar Colaborador</button>
+        </div>
+      </div>
+
+      <table id="tabelaEquipe">
+        <thead>
+          <tr>
+            <th>Equipe</th>
+            <th>Colaborador</th>
+            <th>Email</th>
+            <th>Nível</th>
+            <th>Ações</th> 
+          </tr>
+        </thead>
+        <tbody>
+          
+        </tbody>
+      </table>
+    </main>
+  </div>
+
+  <!-- SCRIPT -->
+  <script>
+    function abrirCadastrarEquipe() {
+      window.location.href = "CadastrarEquipe.html";
+    }
+
+    function abrirCadastrarColaborador() {
+      window.location.href = "CadastrarColaborador.html";
+    }
+
+    function carregarEquipes() {
+      const tabela = document.querySelector("#tabelaEquipe tbody");
+      tabela.innerHTML = "";
+
+      fetch("http://localhost:8080/JoyTask/ListarEquipesComColaboradores")
+        .then(res => res.json())
+        .then(dados => {
+          dados.forEach(item => {
+            const linha = tabela.insertRow();
+            linha.insertCell(0).textContent = item.nome;
+            linha.insertCell(1).textContent = item.colaboradorNome;
+            linha.insertCell(2).textContent = item.colaboradorEmail;
+            linha.insertCell(3).textContent = item.colaboradorNivel;
+
+            const celulaAcoes = linha.insertCell(4);
+            const botaoExcluir = document.createElement("button");
+            botaoExcluir.textContent = "Excluir";
+            botaoExcluir.classList.add("btn-excluir");
+            botaoExcluir.onclick = () => excluirEquipePorNome(item.nome);
+            celulaAcoes.appendChild(botaoExcluir);
+          });
+        })
+        .catch(err => {
+          console.error("Erro ao carregar equipes com colaboradores:", err);
+        });
+    }
+
+    function excluirEquipePorNome(nomeEquipe) {
+      if (!confirm(`Tem certeza que deseja excluir a equipe "${nomeEquipe}"?`)) return;
+
+      fetch("excluirEquipe", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `nome=${encodeURIComponent(nomeEquipe)}`
+      })
+      .then(response => {
+        if (response.ok) {
+          alert("Equipe excluída com sucesso!");
+          carregarEquipes();
+        } else {
+          alert("Erro ao excluir equipe.");
+        }
+      })
+      .catch(error => {
+        console.error("Erro ao excluir equipe:", error);
+        alert("Erro na comunicação com o servidor.");
+      });
+    }
+
+    function filtrarEquipes() {
+      const termo = document.getElementById("buscarEquipe").value.toLowerCase();
+      const linhas = document.querySelectorAll("#tabelaEquipe tbody tr");
+
+      linhas.forEach(linha => {
+        const equipe = linha.cells[0].textContent.toLowerCase();
+        linha.style.display = equipe.includes(termo) ? "" : "none";
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      carregarEquipes();
+
+      const data = new Date();
+      const dataFormatada = data.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+      document.getElementById("dataAtual").textContent = dataFormatada;
+    });
+
+    document.getElementById("buscarEquipe").addEventListener("keyup", filtrarEquipes);
+  </script>
+</body>
+</html>

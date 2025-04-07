@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Anexos - TaskJoy</title>
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <div class="container">
+    <!-- MENU LATERAL -->
+    <aside class="menu-lateral">
+      <ul>
+        <li><a href="index.html">🏠 Página Inicial</a></li>
+        <li><a href="Metas.html">✅ Metas</a></li>
+        <li><a href="MinhasTarefas.html">🗂️ Minhas Tarefas</a></li>
+        <li><a href="Anexos.html" class="ativo"> 📎 Anexos</a></li>
+        <li><a href="Equipe.html">👥 Equipe</a></li>
+      </ul>
+    </aside>
+
+    <!-- TOPO -->
+    <header class="topo">
+      <h1>Anexos</h1>
+      <span id="dataAtual"></span>
+    </header>
+
+    <!-- CONTEÚDO -->
+    <main class="conteudo">
+      <div class="cabecalho-projetos">
+        <h2>Anexos</h2>
+        <div>
+          <input type="file" id="inputAnexo" style="display: none;" />
+          <button onclick="document.getElementById('inputAnexo').click()">Inserir Anexo</button>
+        </div>
+      </div>
+      
+      <p id="mensagem" style="color: green;"></p>
+
+      <table id="tabelaAnexos">
+        <thead>
+          <tr>
+            <th>Nome do Arquivo</th>
+            <th>Caminho</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Dados serão carregados via JS -->
+        </tbody>
+      </table>
+    </main>
+  </div>
+
+
+  <script>
+    const inputAnexo = document.getElementById("inputAnexo");
+    const tabela = document.querySelector("#tabelaAnexos tbody");
+    const mensagem = document.getElementById("mensagem");
+
+    function carregarAnexos() {
+    const tabela = document.querySelector("#tabelaAnexos tbody");
+    tabela.innerHTML = "";
+
+    fetch("http://localhost:8080/JoyTask/ListarAnexos")
+      .then(response => response.json())
+      .then(anexos => {
+        anexos.forEach(anexo => {
+          const linha = tabela.insertRow();
+          linha.insertCell(0).textContent = anexo.nomeArquivo;
+          linha.insertCell(1).textContent = anexo.caminho;
+
+          const acoes = linha.insertCell(2);
+          const btnExcluir = document.createElement("button");
+          btnExcluir.textContent = "Excluir";
+          btnExcluir.onclick = () => alert("Funcionalidade de exclusão ainda não implementada.");
+          acoes.appendChild(btnExcluir);
+        });
+      })
+      .catch(error => {
+        console.error("Erro ao carregar anexos:", error);
+        alert("Erro ao buscar anexos do servidor.");
+      });
+  
+    }
+
+
+    function excluirAnexo(index) {
+      alert("Funcionalidade de exclusão ainda não conectada ao backend.");
+    }
+
+    inputAnexo.addEventListener("change", function () {
+      const arquivo = this.files[0];
+      if (arquivo) {
+        const nomeArquivo = arquivo.name;
+        const caminho = arquivo.name; 
+
+        fetch("cadastrarAnexo", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          body: `nome_arquivo=${encodeURIComponent(nomeArquivo)}&caminho_arquivo=${encodeURIComponent(caminho)}`
+        })
+        .then(response => {
+          if (response.redirected) {
+            mensagem.textContent = "Arquivo incluído com sucesso!";
+            setTimeout(() => mensagem.textContent = "", 3000);
+            carregarAnexos();
+          } else {
+            alert("Erro ao cadastrar o anexo.");
+          }
+        })
+        .catch(error => {
+          console.error("Erro:", error);
+          alert("Erro ao enviar o anexo.");
+        });
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      carregarAnexos();
+
+      const data = new Date();
+      const dataFormatada = data.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+      document.getElementById("dataAtual").textContent = dataFormatada;
+    });
+  </script>
+</body>
+</html>
+ 

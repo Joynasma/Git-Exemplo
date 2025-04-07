@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Metas - TaskJoy</title>
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <div class="container">
+    <!-- MENU LATERAL -->
+    <aside class="menu-lateral">
+      <ul>
+        <li><a href="index.html">🏠 Página Inicial</a></li>
+        <li><a href="Metas.html" class="ativo">✅ Metas</a></li>
+        <li><a href="MinhasTarefas.html">🗂️ Minhas Tarefas</a></li>
+        <li><a href="Anexos.html">📎 Anexos</a></li>
+        <li><a href="Equipe.html">👥 Equipe</a></li>
+      </ul>
+    </aside>
+
+    <!-- TOPO -->
+    <header class="topo">
+      <h1>Metas</h1>
+      <span id="dataAtual"></span>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="conteudo">
+      <div class="cabecalho-projetos">
+        <h2>Metas</h2>
+        <div>
+          <input type="text" id="buscarMeta" placeholder="Buscar Meta..." onkeyup="filtrarMetas()">
+          <a href="AdicionarMeta.html"><button>Criar Meta</button></a>
+        </div>
+      </div>
+
+      <table id="tabelaMetas">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Descrição</th>
+            <th>Data Final</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Dados via JS -->
+        </tbody>
+      </table>
+    </main>
+  </div>
+
+  <!-- SCRIPT -->
+  <script>
+    function carregarMetas() {
+      const tabela = document.querySelector("#tabelaMetas tbody");
+      tabela.innerHTML = "";
+
+      fetch("http://localhost:8080/JoyTask/ListarMetas")
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Erro HTTP: " + response.status);
+          }
+          return response.json();
+        })
+        .then(metas => {
+          metas.forEach(meta => {
+            const linha = tabela.insertRow();
+            linha.insertCell(0).textContent = meta.titulo;
+            linha.insertCell(1).textContent = meta.descricao;
+            linha.insertCell(2).textContent = meta.dataEntrega;
+
+            const acoes = linha.insertCell(3);
+            const btnExcluir = document.createElement("button");
+            btnExcluir.textContent = "Excluir";
+            btnExcluir.classList.add("btn-excluir");
+            btnExcluir.onclick = () => excluirMeta(meta.id);
+            acoes.appendChild(btnExcluir);
+          });
+        })
+        .catch(error => {
+          console.error("Erro ao carregar metas:", error);
+          alert("Erro ao buscar metas do servidor.");
+        });
+    }
+
+    function excluirMeta(id) {
+      fetch("excluirMeta", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: `id=${encodeURIComponent(id)}`
+      })
+      .then(response => {
+        if (response.ok) {
+          alert("Meta excluída com sucesso!");
+          carregarMetas();
+        } else {
+          alert("Erro ao excluir meta.");
+        }
+      })
+      .catch(error => {
+        console.error("Erro ao excluir meta:", error);
+        alert("Erro na comunicação com o servidor.");
+      });
+    }
+
+    function filtrarMetas() {
+      const input = document.getElementById("buscarMeta").value.toLowerCase();
+      const linhas = document.querySelector("#tabelaMetas tbody").getElementsByTagName("tr");
+
+      for (let i = 0; i < linhas.length; i++) {
+        const coluna = linhas[i].getElementsByTagName("td")[0];
+        const texto = coluna.textContent || coluna.innerText;
+        linhas[i].style.display = texto.toLowerCase().includes(input) ? "" : "none";
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      carregarMetas();
+
+      const data = new Date();
+      const dataFormatada = data.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+      document.getElementById("dataAtual").textContent = dataFormatada;
+    });
+  </script>
+</body>
+</html>
