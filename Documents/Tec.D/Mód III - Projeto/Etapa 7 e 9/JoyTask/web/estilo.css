@@ -1,0 +1,243 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f2f2f2;
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+  margin-left: 260px;
+}
+
+.menu-lateral {
+  position: fixed; /* <--- Adicione isso */
+  width: 260px;
+  background-color: #002147;
+  min-height: 100vh;
+  color: white;
+  top: 0;
+  left: 0;
+}
+
+
+
+.menu-lateral ul {
+  list-style: none;
+  padding: 0;
+}
+
+.menu-lateral a {
+  color: white;
+  text-decoration: none;
+  display: block;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+}
+
+.menu-lateral a:hover,
+.menu-lateral .ativo {
+  background-color: #2a6496;
+}
+
+.topo {
+  position: fixed;
+  top: 0;
+  left: 260px; 
+  right: 0;
+  background-color: rgb(63, 63, 63);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  height: 60px;
+}
+
+
+.conteudo {
+  margin-left: 260px; /* igual ao .menu-lateral */
+  margin-top: 80px;
+  padding: 2rem;
+  width: calc(100% - 260px); /* ajusta a largura disponível */
+}
+
+
+.cabecalho-projetos {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  margin-bottom: 1rem;
+}
+
+table th, table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+}
+
+table th {
+  background-color: #0b2c52;
+  color: white;
+}
+
+.botoes-acao {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  background-color: #0b2c52;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #15406e;
+}
+
+
+
+
+/* Estilização da Tabela */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    background-color: #fff;
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Cabeçalho da Tabela */
+th {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    text-align: left;
+    border-bottom: 2px solid #ddd;
+}
+
+/* Células da Tabela */
+td {
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+/* Alternar cor das linhas para efeito listrado */
+tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* Hover na linha para destaque */
+tbody tr:hover {
+    background-color: #d6e4ff;
+    transition: 0.3s;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f1f1f1;
+}
+
+.container {
+  display: flex;
+  margin-left: 260px;
+}
+
+.menu-lateral {
+  width: 260px;
+  background-color: #002147;
+  min-height: 100vh;
+  color: white;
+}
+
+.menu-lateral ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.menu-lateral ul li a {
+  display: block;
+  padding: 15px;
+  color: white;
+  text-decoration: none;
+}
+
+.menu-lateral ul li a:hover, .menu-lateral ul li a.ativo {
+  background-color: #004080;
+}
+
+.topo {
+  background-color: #333;
+  color: white;
+  padding: 20px;
+  width: 100%;
+}
+
+.content {
+  padding: 20px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.content h2 {
+  margin-bottom: 20px;
+}
+
+table {
+  width: 100%;
+  max-width: 1000px; /* largura maior */
+  border-collapse: collapse;
+  background-color: white;
+  margin-top: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+th, td {
+  padding: 12px;
+  text-align: center;
+  border: 1px solid #ccc;
+}
+
+th {
+  background-color: #0b2c52;
+  color: white;
+}
+
+.btn-excluir, .content button {
+  background-color: #002147;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  margin-top: 15px;
+  cursor: pointer;
+}
+
+.botoes {
+  margin-top: 20px;
+}
+
+.team-header, .metas-header {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}

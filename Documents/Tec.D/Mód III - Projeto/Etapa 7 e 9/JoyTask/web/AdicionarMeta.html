@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Adicionar Meta - TaskJoy</title>
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <h1>Adicionar Meta</h1>
+
+  <form id="formAdicionarMeta">
+    <label for="nomeMeta">Meta:</label>
+    <input type="text" id="nomeMeta" name="titulo" required>
+
+    <label for="dataFinal">Data Final:</label>
+    <input type="date" id="dataFinal" name="data_entrega" required>
+
+    <label for="descricao">Descrição:</label>
+    <textarea id="descricao" name="descricao" required></textarea>
+
+    <button type="submit">Cadastrar</button>
+    <button type="button" onclick="window.location.href='Metas.html'">Voltar</button>
+  </form>
+
+  <h2>Metas Cadastradas</h2>
+  <table id="tabelaMetas">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Descrição</th>
+        <th>Data Final</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Dados via JS -->
+    </tbody>
+  </table>
+
+  <script>
+    // Envia a meta para o servlet
+    document.getElementById("formAdicionarMeta").addEventListener("submit", function(event) {
+      event.preventDefault(); 
+
+      let titulo = document.getElementById("nomeMeta").value;
+      let data_entrega = document.getElementById("dataFinal").value;
+      let descricao = document.getElementById("descricao").value;
+
+      if (!titulo || !data_entrega || !descricao) {
+        alert("Preencha todos os campos!");
+        return;
+      }
+
+      fetch("cadastrarMeta", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: `titulo=${encodeURIComponent(titulo)}&descricao=${encodeURIComponent(descricao)}&data_entrega=${encodeURIComponent(data_entrega)}`
+      })
+      .then(response => {
+        if (response.redirected) {
+          alert("Meta cadastrada com sucesso!");
+          carregarMetas(); // Atualiza tabela
+        } else {
+          alert("Erro ao cadastrar a meta.");
+        }
+      })
+      .catch(error => {
+        console.error("Erro:", error);
+        alert("Erro ao enviar os dados.");
+      });
+    });
+
+    // Agora puxando do banco
+    function carregarMetas() {
+      const tabela = document.getElementById("tabelaMetas").getElementsByTagName("tbody")[0];
+      tabela.innerHTML = "";
+
+      fetch("http://localhost:8080/JoyTask/ListarMetas")
+        .then(response => response.json())
+        .then(metas => {
+          metas.forEach(meta => {
+            const linha = tabela.insertRow();
+            linha.insertCell(0).textContent = meta.titulo;
+            linha.insertCell(1).textContent = meta.descricao;
+            linha.insertCell(2).textContent = meta.dataEntrega;
+          });
+        })
+        .catch(error => {
+          console.error("Erro ao carregar metas:", error);
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", carregarMetas);
+  </script>
+</body>
+</html>

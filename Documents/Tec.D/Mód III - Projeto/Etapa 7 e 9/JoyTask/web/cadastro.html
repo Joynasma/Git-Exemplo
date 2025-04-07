@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Tarefa</title>
+    <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+    <h1>Nova Tarefa</h1>
+    <form id="formCadastroTarefa">
+        <label for="titulo">Título:</label>
+        <input type="text" id="titulo" name="titulo" required>
+
+        <label for="descricao">Descrição:</label>
+        <textarea id="descricao" name="descricao" required></textarea>
+
+        <label for="dataInicio">Data de Início:</label>
+        <input type="date" id="dataInicio" name="data_inicio" required>
+
+        <label for="dataFim">Data Final:</label>
+        <input type="date" id="dataFim" name="data_fim" required>
+
+        <input type="submit" value="Cadastrar">
+    </form>
+
+    <script>
+      document.getElementById("formCadastroTarefa").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        const titulo = document.getElementById("titulo").value;
+        const descricao = document.getElementById("descricao").value;
+        const data_inicio = document.getElementById("dataInicio").value;
+        const data_fim = document.getElementById("dataFim").value;
+
+        fetch("cadastrarTarefa", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          body: `titulo=${encodeURIComponent(titulo)}&descricao=${encodeURIComponent(descricao)}&data_inicio=${encodeURIComponent(data_inicio)}&data_fim=${encodeURIComponent(data_fim)}`
+        })
+        .then(response => {
+          if (response.redirected) {
+            alert("Tarefa cadastrada com sucesso!");
+            window.location.href = response.url;
+          } else {
+            alert("Erro ao cadastrar tarefa.");
+          }
+        })
+        .catch(error => {
+          console.error("Erro:", error);
+          alert("Erro ao enviar os dados.");
+        });
+      });
+    </script>
+</body>
+</html>

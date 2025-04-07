@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Página Inicial - TaskJoy</title>
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <div class="container">
+    <!-- MENU LATERAL -->
+    <aside class="menu-lateral">
+      <ul>
+        <li><a href="index.html" class="ativo">🏠 Página Inicial</a></li>
+        <li><a href="Metas.html">✅ Metas</a></li>
+        <li><a href="MinhasTarefas.html">🗂️ Minhas Tarefas</a></li>
+        <li><a href="Anexos.html">📎 Anexos</a></li>
+        <li><a href="Equipe.html">👥 Equipe</a></li>
+      </ul>
+    </aside>
+
+    <!-- TOPO -->
+    <header class="topo">
+      <h1>Página Inicial</h1>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="conteudo">
+      <div class="cabecalho-projetos">
+        <h2>Projetos</h2>
+        <div>
+          <input type="text" id="buscarProjeto" placeholder="Buscar Projeto..." onkeyup="filtrarProjetos()">
+          <a href="CadastroProjeto.html"><button>Criar Projeto</button></a>
+        </div>
+      </div>
+
+      <table id="tabelaProjetos">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Descrição</th>
+            <th>Entrega</th>
+            <th>Equipe</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+        
+        </tbody>
+      </table>
+    </main>
+  </div>
+
+  <script>
+    function carregarProjetos() {
+      const tabela = document.querySelector("#tabelaProjetos tbody");
+      tabela.innerHTML = "";
+
+      fetch("http://localhost:8080/JoyTask/ListarProjetos")
+        .then(response => response.json())
+        .then(projetos => {
+          projetos.forEach(projeto => {
+            const linha = tabela.insertRow();
+
+            linha.insertCell(0).textContent = projeto.nome;
+            linha.insertCell(1).textContent = projeto.descricao;
+            linha.insertCell(2).textContent = projeto.dataEntrega;
+            linha.insertCell(3).textContent = projeto.nomeEquipe || "—";
+
+            const acoes = linha.insertCell(4);
+
+            // Botão ENTREGAR
+            const btnEntregar = document.createElement("button");
+            btnEntregar.textContent = "Entregar";
+            btnEntregar.onclick = () => {
+              if (confirm("Deseja realmente entregar este projeto?")) {
+                fetch("entregarProjeto", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                  body: `id=${encodeURIComponent(projeto.id)}`
+                })
+                .then(response => {
+                  if (response.ok) {
+                    alert("Projeto entregue com sucesso!");
+                    carregarProjetos();
+                  } else {
+                    alert("Erro ao entregar projeto.");
+                  }
+                })
+                .catch(error => {
+                  console.error("Erro ao entregar:", error);
+                  alert("Erro na comunicação com o servidor.");
+                });
+              }
+            };
+
+            // Botão EXCLUIR 
+            const btnExcluir = document.createElement("button");
+            btnExcluir.textContent = "Excluir";
+            btnExcluir.onclick = () => {
+              alert("Função de exclusão separada pode ser implementada.");
+            };
+
+            acoes.appendChild(btnEntregar);
+            acoes.appendChild(btnExcluir);
+          });
+        })
+        .catch(error => {
+          console.error("Erro ao carregar projetos:", error);
+          alert("Erro ao buscar projetos.");
+        });
+    }
+
+    function filtrarProjetos() {
+      const input = document.getElementById("buscarProjeto").value.toLowerCase();
+      const linhas = document.querySelector("#tabelaProjetos tbody").getElementsByTagName("tr");
+
+      for (let i = 0; i < linhas.length; i++) {
+        const coluna = linhas[i].getElementsByTagName("td")[0];
+        const texto = coluna.textContent || coluna.innerText;
+        linhas[i].style.display = texto.toLowerCase().includes(input) ? "" : "none";
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", carregarProjetos);
+  </script>
+</body>
+</html>

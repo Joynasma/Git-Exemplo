@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Minhas Tarefas - TaskJoy</title>
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <div class="container">
+    <!-- MENU LATERAL -->
+    <aside class="menu-lateral">
+      <ul>
+        <li><a href="index.html">🏠 Página Inicial</a></li>
+        <li><a href="Metas.html">✅ Metas</a></li>
+        <li><a href="MinhasTarefas.html" class="ativo">🗂️ Minhas Tarefas</a></li>
+        <li><a href="Anexos.html">📎 Anexos</a></li>
+        <li><a href="Equipe.html">👥 Equipe</a></li>
+      </ul>
+    </aside>
+
+    <!-- TOPO -->
+    <header class="topo">
+      <h1>Minhas Tarefas</h1>
+      <span id="dataAtual"></span>
+    </header>
+
+    <!-- CONTEÚDO -->
+    <main class="conteudo">
+      <div class="cabecalho-projetos">
+        <h2>Tarefas</h2>
+        <div>
+          <input type="text" id="buscarTarefa" placeholder="Buscar tarefa...">
+          <button onclick="window.location.href='AdicionarTarefa.html'">Adicionar Tarefa</button>
+        </div>
+      </div>
+
+      <table id="tabelaTarefas">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Descrição</th>
+            <th>Data Início</th>
+            <th>Data Final</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Tarefas serão carregadas aqui -->
+        </tbody>
+      </table>
+    </main>
+  </div>
+
+  <!-- SCRIPT -->
+  <script>
+    function carregarTarefas() {
+      const tabela = document.querySelector("#tabelaTarefas tbody");
+      tabela.innerHTML = "";
+
+      fetch("http://localhost:8080/JoyTask/ListarTarefas")
+        .then(res => res.json())
+        .then(tarefas => {
+          tarefas.forEach(tarefa => {
+            const linha = tabela.insertRow();
+            linha.insertCell(0).textContent = tarefa.titulo; 
+            linha.insertCell(1).textContent = tarefa.descricao;
+            linha.insertCell(2).textContent = tarefa.dataInicio;
+            linha.insertCell(3).textContent = tarefa.dataFim;
+
+            const acoes = linha.insertCell(4);
+            const btnExcluir = document.createElement("button");
+            btnExcluir.textContent = "Excluir";
+            btnExcluir.onclick = () => excluirTarefa(tarefa.id);
+            acoes.appendChild(btnExcluir);
+          });
+        })
+        .catch(error => {
+          console.error("Erro ao carregar tarefas:", error);
+        });
+    }
+
+    function excluirTarefa(id) {
+        fetch("excluirTarefa", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: `id=${encodeURIComponent(id)}`
+        })
+        .then(response => {
+            if (response.ok) {
+                alert("Tarefa excluída com sucesso!");
+                carregarTarefas(); // ou atualizar a tabela
+            } else {
+                alert("Erro ao excluir tarefa.");
+            }
+        })
+        .catch(error => {
+            console.error("Erro ao excluir tarefa:", error);
+            alert("Erro na comunicação com o servidor.");
+        });
+    }
+
+
+    function filtrarTarefas() {
+      const termo = document.getElementById("buscarTarefa").value.toLowerCase();
+      const linhas = document.querySelectorAll("#tabelaTarefas tbody tr");
+
+      linhas.forEach(linha => {
+        const titulo = linha.cells[0].textContent.toLowerCase();
+        linha.style.display = titulo.includes(termo) ? "" : "none";
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      carregarTarefas();
+
+      const data = new Date();
+      const dataFormatada = data.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+      document.getElementById("dataAtual").textContent = dataFormatada;
+    });
+
+    document.getElementById("buscarTarefa").addEventListener("keyup", filtrarTarefas);
+  </script>
+</body>
+</html>

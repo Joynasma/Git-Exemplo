@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cadastrar Equipe - TaskJoy</title>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+  <div class="modal">
+    <div class="modal-content">
+      <h2>Cadastrar Equipe</h2>
+      <form id="formCadastrarEquipe">
+        <label for="nomeEquipe">Nome da Equipe:</label>
+        <input type="text" id="nomeEquipe" name="nomeEquipe" required />
+
+        <h3>Colaboradores</h3>
+        <input type="text" id="pesquisarColaborador" placeholder="Pesquisar..." />
+
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Email</th>
+              <th>Cargo</th>
+              <th>Nível</th>
+              <th>Adicionar à Equipe</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaColaboradoresEquipe">
+            <!-- Colaboradores carregados dinamicamente -->
+          </tbody>
+        </table>
+
+        <button type="button" onclick="window.location.href='Equipe.html'">Voltar</button>
+        <button type="submit">Cadastrar</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function carregarColaboradoresParaEquipe() {
+      fetch("http://localhost:8080/JoyTask/ListarColaboradores")
+        .then(res => res.json())
+        .then(colaboradores => {
+          const tabela = document.getElementById("tabelaColaboradoresEquipe");
+          tabela.innerHTML = "";
+
+          colaboradores.forEach(colaborador => {
+            const linha = document.createElement("tr");
+            linha.innerHTML = `
+              <td>${colaborador.nome}</td>
+              <td>${colaborador.email}</td>
+              <td>${colaborador.cargo}</td>
+              <td>${colaborador.nivel}</td>
+              <td style="text-align: center;">
+                <input type="checkbox" class="chk-colaborador" data-id="${colaborador.id}">
+              </td>
+            `;
+            tabela.appendChild(linha);
+          });
+        })
+        .catch(error => {
+          console.error("Erro ao carregar colaboradores:", error);
+          alert("Erro ao carregar colaboradores do servidor.");
+        });
+    }
+
+    document.getElementById("pesquisarColaborador").addEventListener("keyup", function () {
+      const termo = this.value.toLowerCase();
+      const linhas = document.querySelectorAll("#tabelaColaboradoresEquipe tr");
+
+      linhas.forEach(linha => {
+        const nome = linha.cells[0].textContent.toLowerCase();
+        linha.style.display = nome.includes(termo) ? "" : "none";
+      });
+    });
+
+    document.getElementById("formCadastrarEquipe").addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const nomeEquipe = document.getElementById("nomeEquipe").value.trim();
+      const checkboxes = document.querySelectorAll(".chk-colaborador:checked");
+
+      if (!nomeEquipe || checkboxes.length === 0) {
+        alert("Informe o nome da equipe e selecione pelo menos um colaborador.");
+        return;
+      }
+
+      const idsColaboradores = [];
+      checkboxes.forEach(chk => {
+        const id = chk.getAttribute("data-id");
+        idsColaboradores.push(parseInt(id));
+      });
+
+      fetch("cadastrarEquipe", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `nome=${encodeURIComponent(nomeEquipe)}&colaboradores=${encodeURIComponent(JSON.stringify(idsColaboradores))}`
+      })
+      .then(response => {
+        if (response.redirected) {
+          alert("Equipe cadastrada com sucesso!");
+          window.location.href = response.url;
+        } else {
+          alert("Erro ao cadastrar equipe.");
+        }
+      })
+      .catch(error => {
+        console.error("Erro:", error);
+        alert("Erro ao enviar os dados.");
+      });
+    });
+
+    document.addEventListener("DOMContentLoaded", carregarColaboradoresParaEquipe);
+  </script>
+</body>
+</html>

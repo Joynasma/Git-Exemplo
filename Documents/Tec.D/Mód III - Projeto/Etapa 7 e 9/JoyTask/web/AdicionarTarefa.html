@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Adicionar Tarefa - TaskJoy</title>
+    <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+    <h2>Adicionar Tarefa</h2>
+    <div style="padding: 20px; max-width: 500px;">
+        <label>Tarefa:</label><br>
+        <input type="text" id="nomeTarefa"><br><br>
+
+        <label>Data de Início:</label><br>
+        <input type="date" id="dataInicio"><br><br>
+
+        <label>Data Final:</label><br>
+        <input type="date" id="dataFinal"><br><br>
+
+        <label>Descrição:</label><br>
+        <textarea id="descricaoTarefa" rows="4" cols="50"></textarea><br><br>
+
+        <button onclick="cadastrarTarefa()">Cadastrar</button>
+        <button onclick="window.location.href='MinhasTarefas.html'">Voltar</button>
+    </div>
+
+    <h3>Tarefas Cadastradas</h3>
+    <table border="1" id="tabelaTarefas" style="width: 100%;">
+        <thead>
+            <tr style="background-color: dodgerblue; color: white;">
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Data Início</th>
+                <th>Data Final</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+
+    function cadastrarTarefa() {
+        const titulo = document.getElementById("nomeTarefa").value;
+        const data_inicio = document.getElementById("dataInicio").value;
+        const data_fim = document.getElementById("dataFinal").value;
+        const descricao = document.getElementById("descricaoTarefa").value;
+
+        if (!titulo || !data_inicio || !data_fim || !descricao) {
+            alert("Preencha todos os campos.");
+            return;
+        }
+
+        fetch("cadastrarTarefa", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: `titulo=${encodeURIComponent(titulo)}&descricao=${encodeURIComponent(descricao)}&data_inicio=${encodeURIComponent(data_inicio)}&data_fim=${encodeURIComponent(data_fim)}`
+        })
+        .then(response => {
+            if (response.redirected) {
+                alert("Tarefa cadastrada com sucesso!");
+                window.location.href = response.url;
+            } else {
+                alert("Erro ao cadastrar tarefa.");
+            }
+        })
+        .catch(error => {
+            console.error("Erro:", error);
+            alert("Erro ao enviar os dados.");
+        });
+    }
+
+    function exibirTarefas() {
+        fetch("ListarTarefas")
+            .then(response => {
+                if (!response.ok) throw new Error("Erro na resposta do servidor");
+                return response.json();
+            })
+            .then(tarefas => {
+                const tabela = document.querySelector("#tabelaTarefas tbody");
+                tabela.innerHTML = "";
+
+                tarefas.forEach(tarefa => {
+                    const linha = tabela.insertRow();
+                    linha.insertCell(0).textContent = tarefa.titulo;
+                    linha.insertCell(1).textContent = tarefa.descricao;
+                    linha.insertCell(2).textContent = tarefa.dataInicio;
+                    linha.insertCell(3).textContent = tarefa.dataFim; // <--- CORRETO AQUI
+                });
+            })
+            .catch(error => {
+                console.error("Erro ao carregar tarefas:", error);
+                alert("Erro ao carregar tarefas do banco.");
+            });
+    }
+
+    
+
+    document.addEventListener("DOMContentLoaded", exibirTarefas);
+</script>
+
+</body>
+</html>
